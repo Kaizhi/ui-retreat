@@ -1,3 +1,5 @@
+import EventBus from '/event-bus.js';
+
 export default {
   template:
   `<div class="groot-corp">
