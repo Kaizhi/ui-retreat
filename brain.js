@@ -13,10 +13,10 @@ sub.subscribe("exchange.logs.groot", (arg, channel) => console.log(`Subscribed t
 sub.subscribe(`exchange.registry.${REGISTRY_KEY}`);
 
 sub.on("message", (topic, msg) => {
-  console.log(topic);
+  console.log("\x1b[33m", topic + ' ==========================');
   if (topic === "exchange.market") {
     let market = JSON.parse(msg);
-    console.log(market);
+    console.log("\x1b[0m", market);
     let update = {
         component: "groot",
         data: {path: 'message', value: `Units available: ${market.units} at \$${market.price}.`}
@@ -26,15 +26,15 @@ sub.on("message", (topic, msg) => {
     handleMarketMessage(market);
   }
   else if (topic === "exchange.logs.groot") {
-    console.log(msg);
+    console.log("\x1b[0m", msg);
   }
   else if (topic === `exchange.registry.${REGISTRY_KEY}`) {
     let response = JSON.parse(msg);
     sig_key = response.key;
-    console.log('sig key set: ', sig_key);
+    console.log("\x1b[0m", 'sig key set: ', sig_key);
   }
   else {
-    console.log(topic + ':', msg);
+    console.log("\x1b[0m", msg);
   }
 });
 
