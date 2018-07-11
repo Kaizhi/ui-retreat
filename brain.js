@@ -11,6 +11,7 @@ sub.subscribe("exchange.market", (arg, channel) => console.log(`Subscribed to ${
 // subscribe to groot specific logs
 sub.subscribe("exchange.logs.groot", (arg, channel) => console.log(`Subscribed to ${channel}`));
 sub.subscribe(`exchange.registry.${REGISTRY_KEY}`);
+sub.subscribe("exchange.bids");
 
 sub.on("message", (topic, msg) => {
   console.log("\x1b[33m", topic + ' ==========================');
@@ -58,5 +59,3 @@ handleMarketMessage = (market) => {
   }));
 }
 register();
-
-
