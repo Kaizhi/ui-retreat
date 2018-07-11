@@ -4,6 +4,10 @@
   font-weight: light;
 }
 
+.groot-corp .subtitle {
+  font-style: italic;
+}
+
 .corp-name {
   font-size: 2em;
   color: green;
