@@ -40,6 +40,9 @@ sub.on("message", (topic, msg) => {
     console.log("\x1b[0m", msg);
   }
   else if (topic === "exchange.balances.groot") {
+    let response = JSON.parse(msg);
+    balance = response.balance;
+    console.log("BALANCE", response);
     console.log('STARTING BID CYCLE');
     console.log("\x1b[0m", msg);
     startBidCycle();
@@ -50,10 +53,6 @@ sub.on("message", (topic, msg) => {
       sig_key = response.key;
       console.log("\x1b[0m", 'sig key set: ', sig_key);
     }
-  } else if (topic === "exchange.balances.groot") {
-    let response = JSON.parse(msg);
-    balance = response.balance;
-    console.log("BALANCE", response);
   }
   else if (topic === 'exchange.bids') {
     let bid = JSON.parse(msg);
@@ -90,6 +89,7 @@ publishBids = (hash) => {
 
   Object.keys(hash).forEach((key) => {
     let quantity;
+    console.log('balance vs price for qty:', balance, (hash[key].qty * hash[key].price));
     if (balance > (hash[key].qty * hash[key].price)) {
       quantity = hash[key].qty;
     } else {
