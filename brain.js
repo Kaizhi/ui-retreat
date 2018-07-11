@@ -5,7 +5,7 @@ const sub = redis.createClient(6379, 'beat42');
 const pub = redis.createClient(6379, 'beat42'); //need 2 clients: can't publish after subscribed
 
 const REGISTRY_KEY = 911;
-let sig_key = undefined;
+let sig_key = '6uzc3sn7';
 let bidsHash = undefined;
 let balance = undefined;
 
@@ -29,7 +29,11 @@ sub.on("message", (topic, msg) => {
     pub.publish("main.model", JSON.stringify(update));
 
     if (bidsHash) {
-      bidsHash[market.offerId] = market;
+      bidsHash[market.offerId] = {
+        qty: market.units,
+        offerId: market.offerId,
+        price: market.price
+      };
     }
   }
   else if (topic === "exchange.logs.groot") {
@@ -42,8 +46,10 @@ sub.on("message", (topic, msg) => {
   }
   else if (topic === `exchange.registry.${REGISTRY_KEY}`) {
     let response = JSON.parse(msg);
-    sig_key = response.key;
-    console.log("\x1b[0m", 'sig key set: ', sig_key);
+    if (!sig_key) {
+      sig_key = response.key;
+      console.log("\x1b[0m", 'sig key set: ', sig_key);
+    }
   } else if (topic === "exchange.balances.groot") {
     let response = JSON.parse(msg);
     balance = response.balance;
@@ -83,7 +89,12 @@ publishBids = (hash) => {
   }
 
   Object.keys(hash).forEach((key) => {
-    let quantity = parseInt((balance/5) / (hash[key].price + 1));
+    let quantity;
+    if (balance > (hash[key].qty * hash[key].price)) {
+      quantity = hash[key].qty;
+    } else {
+      quantity = parseInt((balance/5) / (hash[key].price + 1)) || hash[key].qty / 2;
+    }
     pub.publish('exchange.bids', JSON.stringify({
       offerId: hash[key].offerId,
       slot: 'groot',
@@ -102,4 +113,6 @@ parseBid = (bid) => {
     price: bid.price
   };
 }
-register();
+if (!sig_key) {
+  register();
+}
