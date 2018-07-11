@@ -5,7 +5,7 @@ const sub = redis.createClient(6379, 'beat42');
 const pub = redis.createClient(6379, 'beat42'); //need 2 clients: can't publish after subscribed
 
 const REGISTRY_KEY = 911;
-let sig_key = '6uzc3sn7';
+let sig_key = 'aggiotmo';
 let bidsHash = undefined;
 let balance = undefined;
 
@@ -22,11 +22,6 @@ sub.on("message", (topic, msg) => {
   if (topic === "exchange.market") {
     let market = JSON.parse(msg);
     console.log("\x1b[0m", market);
-    let update = {
-        component: "groot",
-        data: {path: 'message', value: `Units available: ${market.units} at \$${market.price}.`}
-    };
-    pub.publish("main.model", JSON.stringify(update));
 
     if (bidsHash) {
       bidsHash[market.offerId] = {
@@ -42,7 +37,12 @@ sub.on("message", (topic, msg) => {
   else if (topic === "exchange.balances.groot") {
     let response = JSON.parse(msg);
     balance = response.balance;
-    console.log("BALANCE", response);
+    let update = {
+      component: "groot",
+      data: {path: 'message', value: `Net worth: $${(balance).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`}
+    };
+    pub.publish("main.model", JSON.stringify(update));
+
     console.log('STARTING BID CYCLE');
     console.log("\x1b[0m", msg);
     startBidCycle();
